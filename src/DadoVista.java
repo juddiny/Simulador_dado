@@ -4,9 +4,6 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.LinkedList;
 
-/**
- * Clase que representa la interfaz gráfica del dado.
- */
 public class DadoVista extends JPanel {
     private JLabel dadoLabel;
     private JButton lanzarButton;
@@ -14,87 +11,82 @@ public class DadoVista extends JPanel {
     private GraficoFrecuencia graficoFrecuencia;
 
     public DadoVista(GraficoFrecuencia graficoFrecuencia) {
-        this.graficoFrecuencia = graficoFrecuencia; // Inicializar graficoFrecuencia
+        this.graficoFrecuencia = graficoFrecuencia;
+        inicializarComponentes();
+        configurarInterfaz();
+    }
 
-        // Usar BorderLayout para organizar los componentes
-        setLayout(new BorderLayout());
-
-        // Panel superior para el dado
-        JPanel panelSuperior = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        dadoLabel = new JLabel(redimensionarImagen("dado.png", 100, 100)); // Imagen inicial del dado
-        panelSuperior.add(dadoLabel);
-        add(panelSuperior, BorderLayout.NORTH);
-
-        // Panel central para el botón
-        JPanel panelCentral = new JPanel(new FlowLayout(FlowLayout.CENTER));
+    private void inicializarComponentes() {
+        dadoLabel = new JLabel();
         lanzarButton = new JButton(Strings.BOTON_LANZAR);
+        tablaLanzamientos = new JTable(new DefaultTableModel(new String[]{"Últimos Lanzamientos"}, 0));
+    }
 
-        // Agregar un margen al botón
-        lanzarButton.setBorder(new EmptyBorder(10, 20, 10, 20)); // Margen: arriba, izquierda, abajo, derecha
-        panelCentral.add(lanzarButton);
+    private void configurarInterfaz() {
+        setLayout(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        setPreferredSize(new Dimension(Strings.VENTANA_ANCHO, Strings.VENTANA_ALTO));
 
-        // Agregar un margen al panel central para separar el botón de la tabla y el gráfico
-        panelCentral.setBorder(new EmptyBorder(10, 0, 20, 0)); // Margen: arriba, izquierda, abajo, derecha
-        add(panelCentral, BorderLayout.CENTER);
+        // Configuración del dado
+        configurarDado(gbc);
 
-        // Panel inferior para la tabla y el gráfico
-        JPanel panelInferior = new JPanel(new GridLayout(1, 2)); // 1 fila, 2 columnas
+        // Configuración del botón
+        configurarBoton(gbc);
 
-        // Crear la tabla con un título personalizado
-        String[] columnas = {getTituloTabla()}; // Título de la columna
-        DefaultTableModel modeloTabla = new DefaultTableModel(columnas, 0); // Modelo de tabla con el título
-        tablaLanzamientos = new JTable(modeloTabla);
-        tablaLanzamientos.setEnabled(false); // La tabla no es editable
-        panelInferior.add(new JScrollPane(tablaLanzamientos));
+        // Configuración del panel inferior (tabla y gráfico)
+        configurarPanelInferior(gbc);
+    }
 
+    private void configurarDado(GridBagConstraints gbc) {
+        JPanel panelDado = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        dadoLabel.setIcon(redimensionarImagen("dado.png",
+                (int)(Strings.VENTANA_ANCHO * Strings.DADO_PORCENTAJE_ANCHO),
+                (int)(Strings.VENTANA_ALTO * Strings.DADO_PORCENTAJE_ALTO)));
+        panelDado.add(dadoLabel);
+
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridwidth = 2;
+        gbc.weighty = Strings.DADO_PORCENTAJE_ALTO;
+        gbc.fill = GridBagConstraints.BOTH;
+        add(panelDado, gbc);
+    }
+
+    private void configurarBoton(GridBagConstraints gbc) {
+        JPanel panelBoton = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        lanzarButton.setPreferredSize(new Dimension(
+                (int)(Strings.VENTANA_ANCHO * Strings.BOTON_PORCENTAJE_ANCHO),
+                (int)(Strings.VENTANA_ALTO * Strings.BOTON_PORCENTAJE_ALTO)));
+        panelBoton.add(lanzarButton);
+
+        gbc.gridy = 1;
+        gbc.weighty = Strings.BOTON_PORCENTAJE_ALTO;
+        add(panelBoton, gbc);
+    }
+
+    private void configurarPanelInferior(GridBagConstraints gbc) {
+        JPanel panelInferior = new JPanel(new GridLayout(1, 2, 10, 0));
+        panelInferior.setBorder(new EmptyBorder(10, 10, 10, 10));
+
+        // Configurar tabla
+        JScrollPane scrollTabla = new JScrollPane(tablaLanzamientos);
+        scrollTabla.setPreferredSize(new Dimension(
+                (int)(Strings.VENTANA_ANCHO * Strings.TABLA_PORCENTAJE_ANCHO),
+                (int)(Strings.VENTANA_ALTO * Strings.TABLA_PORCENTAJE_ALTO)));
+        panelInferior.add(scrollTabla);
+
+        // Configurar gráfico
+        graficoFrecuencia.setPreferredSize(new Dimension(
+                (int)(Strings.VENTANA_ANCHO * Strings.GRAFICO_PORCENTAJE_ANCHO),
+                (int)(Strings.VENTANA_ALTO * Strings.GRAFICO_PORCENTAJE_ALTO)));
         panelInferior.add(graficoFrecuencia);
-        add(panelInferior, BorderLayout.SOUTH);
+
+        gbc.gridy = 2;
+        gbc.weighty = 1.0 - (Strings.DADO_PORCENTAJE_ALTO + Strings.BOTON_PORCENTAJE_ALTO);
+        gbc.fill = GridBagConstraints.BOTH;
+        add(panelInferior, gbc);
     }
 
-    public JButton getLanzarButton() {
-        return lanzarButton;
-    }
-
-    public void actualizarDado(int resultado) {
-        dadoLabel.setIcon(redimensionarImagen("dado" + resultado + ".png", 100, 100));
-    }
-
-    /**
-     * Actualiza la tabla con los últimos lanzamientos.
-     * @param historial Lista de los últimos lanzamientos.
-     */
-    public void actualizarTabla(LinkedList<Lanzamiento> historial) {
-        DefaultTableModel modeloTabla = (DefaultTableModel) tablaLanzamientos.getModel();
-        modeloTabla.setRowCount(0); // Limpiar la tabla
-
-        for (Lanzamiento lanzamiento : historial) {
-            modeloTabla.addRow(new Object[]{lanzamiento.getResultado()}); // Agregar cada lanzamiento a la tabla
-        }
-
-        // Actualizar el título de la tabla
-        modeloTabla.setColumnIdentifiers(new String[]{getTituloTabla()});
-    }
-
-    /**
-     * Obtiene el título de la tabla con el número más probable y su porcentaje.
-     * @return El título de la tabla.
-     */
-    private String getTituloTabla() {
-        Object[] numeroMasProbable = graficoFrecuencia.getNumeroMasProbable();
-        return "Últimos Lanzamientos - " + numeroMasProbable[0] + " (" + numeroMasProbable[1] + ")";
-    }
-
-    public void actualizarGrafico() {
-        graficoFrecuencia.actualizarGrafico(); // Llamar al método sin argumentos
-    }
-
-    /**
-     * Método para cargar y redimensionar una imagen desde la carpeta resources.
-     * @param nombreImagen El nombre del archivo de la imagen.
-     * @param ancho El ancho deseado de la imagen.
-     * @param alto El alto deseado de la imagen.
-     * @return Un ImageIcon con la imagen redimensionada.
-     */
     private ImageIcon redimensionarImagen(String nombreImagen, int ancho, int alto) {
         try {
             java.net.URL imageURL = getClass().getClassLoader().getResource(nombreImagen);
@@ -107,5 +99,31 @@ public class DadoVista extends JPanel {
         } catch (Exception e) {
             throw new RuntimeException("Error al cargar la imagen: " + nombreImagen, e);
         }
+    }
+
+    public JButton getLanzarButton() {
+        return lanzarButton;
+    }
+
+    public void actualizarDado(int resultado) {
+        SwingUtilities.invokeLater(() -> {
+            dadoLabel.setIcon(redimensionarImagen("dado" + resultado + ".png",
+                    (int)(Strings.VENTANA_ANCHO * Strings.DADO_PORCENTAJE_ANCHO),
+                    (int)(Strings.VENTANA_ALTO * Strings.DADO_PORCENTAJE_ALTO)));
+        });
+    }
+
+    public void actualizarTabla(LinkedList<Lanzamiento> historial) {
+        SwingUtilities.invokeLater(() -> {
+            DefaultTableModel model = (DefaultTableModel) tablaLanzamientos.getModel();
+            model.setRowCount(0);
+            historial.forEach(lanzamiento ->
+                    model.addRow(new Object[]{lanzamiento.getResultado()})
+            );
+        });
+    }
+
+    public void actualizarGrafico() {
+        graficoFrecuencia.actualizarGrafico();
     }
 }

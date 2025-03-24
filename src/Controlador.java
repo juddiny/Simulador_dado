@@ -1,16 +1,11 @@
 import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.LinkedList;
 
-/**
- * Clase que controla la interacción entre la vista y el modelo.
- */
 public class Controlador {
-    private Dado dado;
-    private DadoVista vista;
-    private HistorialLanzamientos historial;
-    private GraficoFrecuencia graficoFrecuencia;
+    private final Dado dado;
+    private final DadoVista vista;
+    private final HistorialLanzamientos historial;
+    private final GraficoFrecuencia graficoFrecuencia;
 
     public Controlador(Dado dado, DadoVista vista, GraficoFrecuencia graficoFrecuencia) {
         this.dado = dado;
@@ -18,18 +13,43 @@ public class Controlador {
         this.historial = new HistorialLanzamientos();
         this.graficoFrecuencia = graficoFrecuencia;
 
-        vista.getLanzarButton().addActionListener(e -> {
-            try {
-                int resultado = dado.lanzar();
-                graficoFrecuencia.realizarLanzamiento(); // Actualiza el gráfico
-                historial.añadirLanzamiento(new Lanzamiento(resultado));
-                vista.actualizarDado(resultado);
-                vista.actualizarTabla(historial.getHistorial());
-                vista.actualizarGrafico();
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(vista, Strings.ERROR_LANZAMIENTO,
-                        "Error", JOptionPane.ERROR_MESSAGE);
-            }
+        configurarControlador();
+    }
+
+    private void configurarControlador() {
+        vista.getLanzarButton().addActionListener(e -> manejarLanzamiento());
+    }
+
+    private void manejarLanzamiento() {
+        try {
+            int resultado = dado.lanzar();
+            actualizarModelo(resultado);
+            actualizarVista(resultado);
+        } catch (Exception ex) {
+            mostrarError(ex);
+        }
+    }
+
+    private void actualizarModelo(int resultado) {
+        graficoFrecuencia.realizarLanzamiento();
+        historial.añadirLanzamiento(new Lanzamiento(resultado));
+    }
+
+    private void actualizarVista(int resultado) {
+        vista.actualizarDado(resultado);
+        vista.actualizarTabla(historial.getHistorial());
+        vista.actualizarGrafico();
+    }
+
+    private void mostrarError(Exception ex) {
+        SwingUtilities.invokeLater(() -> {
+            JOptionPane.showMessageDialog(
+                    vista,
+                    Strings.ERROR_LANZAMIENTO + "\nDetalle: " + ex.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
+            ex.printStackTrace();
         });
     }
 }
