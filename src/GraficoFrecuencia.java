@@ -42,9 +42,9 @@ public class GraficoFrecuencia extends JPanel {
 
         // Crear gráfico
         JFreeChart chart = ChartFactory.createBarChart(
-                "Frecuencia de Lanzamientos",
-                "Resultado",
-                "Frecuencia",
+                Strings.TITULO_GRAFICA,
+                Strings.RESULTADOS_GRAFICA,
+                Strings.VARIABLE_GRAFICA,
                 dataset,
                 PlotOrientation.VERTICAL,
                 true,
@@ -85,7 +85,7 @@ public class GraficoFrecuencia extends JPanel {
     public void actualizarGrafico() {
         SwingUtilities.invokeLater(() -> {
             dataset.clear();
-            frecuencia.forEach((k, v) -> dataset.addValue(v, "Frecuencia", k));
+            frecuencia.forEach((k, v) -> dataset.addValue(v, Strings.VARIABLE_GRAFICA, k));
         });
     }
 

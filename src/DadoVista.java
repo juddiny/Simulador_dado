@@ -9,17 +9,12 @@ public class DadoVista extends JPanel {
     private JButton lanzarButton;
     private JTable tablaLanzamientos;
     private GraficoFrecuencia graficoFrecuencia;
+    private DefaultTableModel modeloTabla;
 
     public DadoVista(GraficoFrecuencia graficoFrecuencia) {
         this.graficoFrecuencia = graficoFrecuencia;
         inicializarComponentes();
         configurarInterfaz();
-    }
-
-    private void inicializarComponentes() {
-        dadoLabel = new JLabel();
-        lanzarButton = new JButton(Strings.BOTON_LANZAR);
-        tablaLanzamientos = new JTable(new DefaultTableModel(new String[]{"Últimos Lanzamientos"}, 0));
     }
 
     private void configurarInterfaz() {
@@ -37,9 +32,20 @@ public class DadoVista extends JPanel {
         configurarPanelInferior(gbc);
     }
 
+    private void inicializarComponentes() {
+        dadoLabel = new JLabel();
+        lanzarButton = new JButton(Strings.BOTON_LANZAR);
+        modeloTabla = new DefaultTableModel(new String[]{getTituloTabla()}, 0);
+        tablaLanzamientos = new JTable(modeloTabla);
+    }
+    private String getTituloTabla() {
+        Object[] numeroProbable = graficoFrecuencia.getNumeroMasProbable();
+        return Strings.TITULO_TABLA_BASE + numeroProbable[0] + " (" + numeroProbable[1] + ")";
+    }
+
     private void configurarDado(GridBagConstraints gbc) {
         JPanel panelDado = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        dadoLabel.setIcon(redimensionarImagen("dado.png",
+        dadoLabel.setIcon(redimensionarImagen(Strings.DADO_INICIAL,
                 (int)(Strings.VENTANA_ANCHO * Strings.DADO_PORCENTAJE_ANCHO),
                 (int)(Strings.VENTANA_ALTO * Strings.DADO_PORCENTAJE_ALTO)));
         panelDado.add(dadoLabel);
@@ -91,13 +97,13 @@ public class DadoVista extends JPanel {
         try {
             java.net.URL imageURL = getClass().getClassLoader().getResource(nombreImagen);
             if (imageURL == null) {
-                throw new RuntimeException("No se pudo encontrar la imagen: " + nombreImagen);
+                throw new RuntimeException(Strings.FALLO_RUTA_IMG + nombreImagen);
             }
             ImageIcon iconoOriginal = new ImageIcon(imageURL);
             Image imagenRedimensionada = iconoOriginal.getImage().getScaledInstance(ancho, alto, Image.SCALE_SMOOTH);
             return new ImageIcon(imagenRedimensionada);
         } catch (Exception e) {
-            throw new RuntimeException("Error al cargar la imagen: " + nombreImagen, e);
+            throw new RuntimeException(Strings.ERROR_CARGA_IMG + nombreImagen, e);
         }
     }
 
@@ -107,7 +113,7 @@ public class DadoVista extends JPanel {
 
     public void actualizarDado(int resultado) {
         SwingUtilities.invokeLater(() -> {
-            dadoLabel.setIcon(redimensionarImagen("dado" + resultado + ".png",
+            dadoLabel.setIcon(redimensionarImagen(Strings.DADO_FORMATO + resultado + Strings.DADO_EXTENSION,
                     (int)(Strings.VENTANA_ANCHO * Strings.DADO_PORCENTAJE_ANCHO),
                     (int)(Strings.VENTANA_ALTO * Strings.DADO_PORCENTAJE_ALTO)));
         });
@@ -115,11 +121,12 @@ public class DadoVista extends JPanel {
 
     public void actualizarTabla(LinkedList<Lanzamiento> historial) {
         SwingUtilities.invokeLater(() -> {
-            DefaultTableModel model = (DefaultTableModel) tablaLanzamientos.getModel();
-            model.setRowCount(0);
-            historial.forEach(lanzamiento ->
-                    model.addRow(new Object[]{lanzamiento.getResultado()})
-            );
+            modeloTabla.setRowCount(0);
+            for (Lanzamiento lanzamiento : historial) {
+                modeloTabla.addRow(new Object[]{lanzamiento.getResultado()});
+            }
+            // Actualizar el título con el número más probable
+            modeloTabla.setColumnIdentifiers(new String[]{getTituloTabla()});
         });
     }
 

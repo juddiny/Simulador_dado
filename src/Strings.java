@@ -17,9 +17,28 @@ public class Strings {
     public static final double BOTON_PORCENTAJE_ALTO = 0.1;
     public static final double GRAFICO_PORCENTAJE_ANCHO = 0.4;
     public static final double GRAFICO_PORCENTAJE_ALTO = 0.4;
-    public static final double TABLA_PORCENTAJE_ANCHO = 0.4;
+    public static final double TABLA_PORCENTAJE_ANCHO = 0.45;
     public static final double TABLA_PORCENTAJE_ALTO = 0.4;
 
     // cantidad de lanzamientos (estos se muestran inicialmnete en la tabla y son el punto de referencia para el calculo del numero mas probable)
     public static final int Lanzamientos=10;
+
+    // strings de la gráfica
+    public static String VARIABLE_GRAFICA ="Frecuencia";
+    public static String TITULO_GRAFICA = "Gráfica de frecuencia";
+    public static String RESULTADOS_GRAFICA = "Resultado";
+
+    // strings de la tabla
+    public static String TITULO_TABLA="Últimos Lanzamientos";
+    public static final String TITULO_TABLA_BASE = "Últimos Lanzamientos - ";
+
+    // nombres de las imagenes
+    public static String DADO_INICIAL="dado.png";
+    public static String DADO_FORMATO="dado";
+    public static String DADO_EXTENSION=".png";
+
+    //Errores
+    //Errores imagenes
+    public static String FALLO_RUTA_IMG="No se pudo encontrar la imagen: ";
+    public static String ERROR_CARGA_IMG="Error al cargar la imagen: ";
 }

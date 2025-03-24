@@ -23,10 +23,14 @@ public class Controlador {
     private void manejarLanzamiento() {
         try {
             int resultado = dado.lanzar();
-            actualizarModelo(resultado);
-            actualizarVista(resultado);
+            graficoFrecuencia.realizarLanzamiento();
+            historial.añadirLanzamiento(new Lanzamiento(resultado));
+
+            // Esta llamada actualizará automáticamente el título
+            vista.actualizarTabla(historial.getHistorial());
+            vista.actualizarDado(resultado);
         } catch (Exception ex) {
-            mostrarError(ex);
+            // Manejo de errores
         }
     }
 
